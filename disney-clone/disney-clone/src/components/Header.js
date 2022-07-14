@@ -5,7 +5,17 @@ import { useDispatch,useSelector } from 'react-redux';
 import {useNavigate} from 'react-router-dom';
 import { selectUserName,selectUserEmail,selectUserPhoto, setUserLoginDetails, setSignOutState } from '../features/user/userSlice';
 import { setUserId } from 'firebase/analytics';
-import { selectLogin } from '../features/login/loginSlice';
+import { selectLogin, setLogin } from '../features/login/loginSlice';
+import logo from "../assets/images/logo.svg";
+import SeriesIcon from "../assets/images/series-icon.svg";
+import MovieIcon from "../assets/images/movie-icon.svg";
+import OriginalIcon from "../assets/images/original-icon.svg";
+import HomeIcon from "../assets/images/home-icon.svg";
+import SearchIcon from "../assets/images/search-icon.svg";
+import WatchlistIcon from "../assets/images/watchlist-icon.svg";
+
+
+
 
 const Nav=styled.nav`
 position: fixed;
@@ -158,21 +168,9 @@ ${UserImg}{
 `;
 export default function Header(props) {
     const dispatch=useDispatch();
-    const navigate=useNavigate();
     const userPhoto=useSelector(selectUserPhoto);
     const loggedIn=useSelector(selectLogin);
-    const handleAuth=()=>{
-        if(!loggedIn){
-            signInPopup().then((res)=>setUser(res.user)).catch(err=>alert(err.message));
-        }
-        else if(loggedIn){
-            auth.signOut().then(()=>{
-                dispatch(setSignOutState());
-                navigate('/');
-            }).catch((err)=>alert(err.message))
-        }
-    };
-
+    const navigate=useNavigate();
 
     const setUser=(user)=>{
         dispatch(setUserLoginDetails({
@@ -180,49 +178,74 @@ export default function Header(props) {
             email:user.email,
             photo:user.photoURL
         }))
-    };
+      };
+
+      const setLoggedIn=(c)=>{
+        dispatch(setLogin({
+            loggedIn:c
+        }))
+      }
+
+    const handleAuth=(e)=>{
+          if(!loggedIn){
+                signInPopup().then((res)=>{
+                    setUser(res.user);
+                    setLoggedIn(true); 
+                    localStorage.setItem("isLoggedIn","true");
+                })
+                .catch(err=>alert(err.message));
+             }
+            else if(loggedIn){
+                auth.signOut().then(()=>{
+                    dispatch(setSignOutState());
+                    setLoggedIn(false);
+                    localStorage.clear();
+                    navigate('/');
+                }).catch((err)=>alert(err.message))
+            }
+    }
     
   return (
    <Nav>
     <Logo>
-        <img src="images/logo.svg" onClick={(e)=>navigate('/')} alt="disney"/>
+        <img key="disneylogo" src={logo} onClick={(e)=>navigate('/')} alt="disney"/>
     </Logo>
     {loggedIn?
         <>
        <NavMenu>
        <a href='/home'>
-           <img src="images/home-icon.svg" alt="home"/>
+           <img key="home" src={HomeIcon} alt="home"/>
            <span>HOME</span>
 
        </a>
        <a href='/search'>
-           <img src="images/search-icon.svg" alt="home"/>
+           <img key="search" src={SearchIcon} alt="home"/>
            <span>SEARCH</span>
 
        </a>
        <a href='/watchlist'>
-           <img src="images/watchlist-icon.svg" alt="home"/>
+           <img key="watchlist" src={WatchlistIcon} alt="home"/>
            <span>WATCHLIST</span>
 
        </a>
        <a href='/originals'>
-           <img src="images/original-icon.svg" alt="home"/>
+           <img key="originals" src={OriginalIcon} alt="home"/>
            <span>ORIGINALS</span>
 
        </a>
        <a href='/movies'>
-           <img src="images/movie-icon.svg" alt="home"/>
+           <img key="movies" src={MovieIcon} alt="home"/>
            <span>MOVIES</span>
 
        </a>
        <a href='/series'>
-           <img src="images/series-icon.svg" alt="home"/>
+           <img key="series" src={SeriesIcon} alt="home"/>
            <span>SERIES</span>
 
        </a>
    </NavMenu>
    <SignOut>
-   <UserImg src={userPhoto} alt="user"/>
+   {userPhoto?<UserImg key="userPhoto" src={userPhoto} alt="user"/>:''}
    <DropDown>
     <span onClick={handleAuth}>Sign Out</span>
    </DropDown>

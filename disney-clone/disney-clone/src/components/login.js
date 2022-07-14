@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { selectLogin } from '../features/login/loginSlice';
+import { selectLogin, setLogin } from '../features/login/loginSlice';
+import CLO from '../assets/images/cta-logo-one.svg';
+import CLT from '../assets/images/cta-logo-two.png';
+import { setUserLoginDetails } from '../features/user/userSlice';
+import { auth } from '../firebase';
 
 
 const Container=styled.div`
@@ -35,7 +39,7 @@ bottom: 0;
 left: 0;
 right: 0;
 z-index: -1;
-background-image: url("images/login-background.jpg");
+background-image: url("login-background.jpg");
 `;
 
 const CTA=styled.div`
@@ -92,27 +96,61 @@ width: 100%;
 
 `;
 const Login=(props)=>{
-const login=useSelector(selectLogin);
-const navigate=useNavigate();
-useEffect(()=>{
-  if(login){
-    navigate('/home');
-  }else{
-    navigate('');
+
+  const login=useSelector(selectLogin);
+  const navigate=useNavigate();
+  const dispatch=useDispatch();
+
+
+  const setUser=(user)=>{
+    dispatch(setUserLoginDetails({
+        name:user.displayName,
+        email:user.email,
+        photo:user.photoURL
+    }))
+  };
+
+  const setLoggedIn=(c)=>{
+    dispatch(setLogin({
+        loggedIn:c
+    }))
   }
-},[login]);
+
+
+  useEffect(()=>{
+    if(login){
+      navigate('/home');
+      auth.onAuthStateChanged(async(user)=>{
+        if(user){
+            setLoggedIn(true);
+            setUser(user);
+            localStorage.setItem("isLoggedIn","true");
+        }else{
+          localStorage.clear();
+          setLoggedIn(false);
+          setUser(user);
+          navigate('/');
+        }
+      });
+    }else{
+      navigate('/');
+    }
+  },[login]);
+
+
+
 return (
 <Container>
     <Content>
       <CTA>
-        <CTALogoOne src="images/cta-logo-one.svg" alt=""/>
+        <CTALogoOne src={CLO} alt=""/>
         <SignUp>GET ALL THERE</SignUp>
         <Description>
         Get Premier Access to Raya and the Last Dragon for an additional fee
             with a Disney+ subscription. As of 03/26/21, the price of Disney+
             and The Disney Bundle will increase by $1.
         </Description>
-        <CTALogoTwo src="images/cta-logo-two.png"/>
+        <CTALogoTwo src={CLT}/>
       </CTA>
       <BgImage/>
     </Content>

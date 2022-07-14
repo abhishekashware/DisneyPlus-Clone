@@ -4,6 +4,12 @@ import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
 import { settings } from 'firebase/analytics';
 import styled from 'styled-components';
+import SliderBadging from '../assets/images/slider-badging.jpg';
+import SliderScale from '../assets/images/slider-scale.jpg';
+import SliderBadag from '../assets/images/slider-badag.jpg';
+import SliderScales from '../assets/images/slider-scales.jpg';
+
+
 
 function ImgSlider(props) {
     let Settings={
@@ -18,25 +24,25 @@ function ImgSlider(props) {
         <Carousel {...Settings}>
            <Wrap>
             <a>
-                <img src="images/slider-badging.jpg" alt=""/>
+                <img src={SliderBadging} alt=""/>
             </a>
            </Wrap>
 
            <Wrap>
             <a>
-                <img src="images/slider-scale.jpg" alt=""/>
+                <img src={SliderScale} alt=""/>
             </a>
            </Wrap>
 
            <Wrap>
             <a>
-                <img src="images/slider-badag.jpg" alt=""/>
+                <img src={SliderBadag} alt=""/>
             </a>
            </Wrap>
 
            <Wrap>
             <a>
-                <img src="images/slider-scales.jpg" alt=""/>
+                <img src={SliderScales} alt=""/>
             </a>
            </Wrap>
         </Carousel>

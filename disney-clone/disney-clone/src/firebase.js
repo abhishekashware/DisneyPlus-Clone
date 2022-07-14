@@ -1,6 +1,6 @@
 import {initializeApp} from 'firebase/app';
 import {getAnalytics}  from 'firebase/analytics';
-import {getAuth, GoogleAuthProvider,signInWithPopup} from 'firebase/auth';
+import {getAuth, GoogleAuthProvider,signInWithPopup, signInWithRedirect} from 'firebase/auth';
 import {getStorage} from 'firebase/storage';
 import {collection, getDocs, getFirestore, query, where} from 'firebase/firestore';
 
@@ -21,7 +21,7 @@ const auth=getAuth();
 const provider=new GoogleAuthProvider();
 const storage=getStorage(firebaseApp);
 
-const queryDoc=(db,coll,id)=>getDocs(query(collection(db,coll)));
+const queryDoc=(db,coll)=>getDocs(query(collection(db,coll)));
 const signInPopup=()=>signInWithPopup(auth,provider);
 
 export {queryDoc,queryData,signInPopup,auth, provider, storage};

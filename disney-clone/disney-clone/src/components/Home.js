@@ -3,12 +3,22 @@ import styled from 'styled-components';
 import ImgSlider from './ImgSlider';
 import CardView from './CardView';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectUserName } from '../features/user/userSlice';
-import db, { queryData } from '../firebase';
+import { selectUserName, setUserLoginDetails } from '../features/user/userSlice';
+import db, { auth, queryData } from '../firebase';
 import { selectMovies, setMovies } from '../features/movie/movieSlice';
-import { selectLogin } from '../features/login/loginSlice';
+import { selectLogin, setLogin } from '../features/login/loginSlice';
 import { useNavigate } from 'react-router-dom';
+import DisneyViewers from '../assets/images/viewers-disney.png';
+import PixarViewers from '../assets/images/viewers-pixar.png';
+import SWViewers from '../assets/images/viewers-starwars.png';
+import MarvelViewers from '../assets/images/viewers-marvel.png';
 
+import NationalViewers from '../assets/images/viewers-national.png';
+import VD from "../assets/videos/1564674844-disney.mp4";
+import VP from "../assets/videos/1564676714-pixar.mp4";
+import VM from "../assets/videos/1564676115-marvel.mp4";
+import VSW from "../assets/videos/1608229455-star-wars.mp4";
+import VNV from "../assets/videos/1564676296-national-geographic.mp4";
 
 const Container=styled.main`
 position: relative;
@@ -19,7 +29,7 @@ top: 72px;
 padding: 0 calc(3.5vw + 5px);
 
 &:after{
-    background: url('images/home-background.png') center center / cover no-repeat fixed;
+    background: url('home-background.png') center center / cover no-repeat fixed;
     content: '';
     position: absolute;
     inset: 0px;
@@ -30,24 +40,24 @@ padding: 0 calc(3.5vw + 5px);
 
 const moviesJson=  [
     {
-        cardImg:"images/viewers-disney.png",
-        video:"videos/1564674844-disney.mp4"
+        cardImg:DisneyViewers,
+        video:VD
     },
     {
-        cardImg:"images/viewers-pixar.png",
-        video:"videos/1564676714-pixar.mp4"
+        cardImg:PixarViewers,
+        video:VP
     },
     {
-        cardImg:"images/viewers-marvel.png",
-        video:"videos/1564676115-marvel.mp4"
+        cardImg:MarvelViewers,
+        video:VM
     },
     {
-        cardImg:"images/viewers-starwars.png",
-        video:"videos/1608229455-star-wars.mp4"
+        cardImg:SWViewers,
+        video:VSW
     },
     {
-        cardImg:"images/viewers-national.png",
-        video:"videos/1564676296-national-geographic.mp4"
+        cardImg:NationalViewers,
+        video:VNV
     },
 
 ];
@@ -55,17 +65,45 @@ function Home(props) {
  
     const login=useSelector(selectLogin);
     const navigate=useNavigate();
+  
+    const dispatch=useDispatch();
+    const username=useSelector(selectUserName);
+    const movies=useSelector(selectMovies);
+  
     useEffect(()=>{
-      if(login){
-        navigate('/home');
-      }else{
+      if(!login){
         navigate('/');
+      }else{
+        navigate('/home');
+        auth.onAuthStateChanged(async(user)=>{
+            if(user){
+                setLoggedIn(true);
+                setUser(user);
+                localStorage.setItem("isLoggedIn","true");
+            }else{
+              localStorage.clear();
+              setLoggedIn(false);
+              setUser(user);
+              navigate('/');
+            }
+          });
       }
     },[login]);
 
-  const dispatch=useDispatch();
-  const username=useSelector(selectUserName);
-  const movies=useSelector(selectMovies);
+    const setUser=(user)=>{
+        dispatch(setUserLoginDetails({
+            name:user.displayName,
+            email:user.email,
+            photo:user.photoURL
+        }))
+      };
+    
+      const setLoggedIn=(c)=>{
+        dispatch(setLogin({
+            loggedIn:c
+        }))
+      }
+
   useEffect(()=>{
     queryData(db,"movies").then(data=>{
         dispatch(setMovies({movies:data.docs.map((d)=>{let t=d.data(); t.id=d.id; return t;})}));

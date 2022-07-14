@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components'
 import db, { queryData, queryDoc } from '../firebase';
+import IconBlack from '../assets/images/play-icon-black.png';
+import IconWhite from '../assets/images/play-icon-white.png';
+import GroupIcon from '../assets/images/group-icon.png';
+import { useSelector } from 'react-redux';
+import { selectLogin } from '../features/login/loginSlice';
 
 function Detail(props) {
    const {id}=useParams();
    const [detailData,setDetailData]=useState({});
+   const loggedIn=useSelector(selectLogin);
+   const navigate=useNavigate();
   
    useEffect(()=>{
-    queryDoc(db,"movies","1").then(res=>{
+    if(!loggedIn){
+        navigate('/');
+    }
+    queryDoc(db,"movies").then(res=>{
         res.docs.forEach(i=>{
             if(i.id==id){
                 setDetailData(i.data());
@@ -30,18 +40,25 @@ function Detail(props) {
        <ContentMeta>
         <Controls>
            <Player>
-            <img src="images/play-icon-black.png" alt=""/>
+            <img key="pib" src={IconBlack} alt=""/>
             <span>Play</span>
            </Player>
            <Trailer>
-            <img src="images/play-icon-white.png" alt=""/>
+            <img key="piw" src={IconWhite} alt=""/>
             <span>Trailer</span>
            </Trailer>
            <AddList>
             <span/>
             <span/>
            </AddList>
+           <GroupWatch>
+            <div>
+                <img src={GroupIcon} alt=""/>
+            </div>
+           </GroupWatch>
         </Controls>
+        <SubTitle>{detailData.subTitle}</SubTitle>
+        <Description>{detailData.description}</Description>
        </ContentMeta>
     </Container>
 
@@ -55,6 +72,51 @@ overflow-x: hidden;
 display: block;
 top: 72px;
 padding: 0 calc(3.5vw + 5px);
+`;
+
+const GroupWatch=styled.div`
+height:44px;
+width:44px;
+border-radius: 50%;
+display: flex;
+justify-content:center;
+align-items:center;
+cursor:pointer;
+background:white;
+
+div{
+    height: 40px;
+    width: 40px;
+    background: rgb(0,0,0);
+    border-radius: 50%;
+
+    img{
+        width:100%;
+    }
+}
+
+`;
+
+
+const SubTitle=styled.div`
+color:rgb(249,249,249);
+font-size: 15px;
+min-height: 20px;
+
+@media (max-width:768px){
+    font-size:12px;
+}
+`;
+
+const Description=styled.div`
+line-height:1.4;
+font-size:20px;
+padding:16px 0px;
+color:rgb(249,249,249);
+
+@media (max-width:768px){
+    font-size:14px;
+}
 `;
 
 const AddList=styled.div`
@@ -79,16 +141,14 @@ span{
         width: 16px;
     }
 
-    //here
+    &:nth-child(2){
+        height:16px;
+        transform: translateX(-8px) rotate(0deg);
+        width:2px;
+    }
 }
 `;
 
-const Trailer=styled.div`
-background: rgba(0,0,0,0.3);
-border: 1px solid rgb(249,249,249);
-color: rgb(249,249,249);
-
-`;
 const Player=styled.div`
 
 font-size: 15px;
@@ -126,7 +186,12 @@ img{
     }
 }
 `;
+const Trailer=styled(Player)`
+background: rgba(0,0,0,0.3);
+border: 1px solid rgb(249,249,249);
+color: rgb(249,249,249);
 
+`;
 const Background=styled.div`
  left: 0px;
  opacity: 0.8;
